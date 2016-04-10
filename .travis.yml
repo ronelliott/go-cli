@@ -1,6 +1,9 @@
 language: go
 install:
   - go get github.com/stretchr/testify
+  - go get github.com/mattn/goveralls
   - go get github.com/ronelliott/go-opts
 script:
-  - go test -v github.com/ronelliott/go-cli
+  - go test -covermode=count -coverprofile=coverage.out -v github.com/ronelliott/go-cli
+after_success:
+  - goveralls -service travis-ci -covermode=count -coverprofile=coverage.out -repotoken=$COVERALLS_REPO_TOKEN
