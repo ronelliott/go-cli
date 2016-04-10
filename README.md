@@ -49,4 +49,4 @@ func main() {
 
 ### Subcommands:
 
-* a more complete example (with subcommands) can be found here: [examples/subcommands](https://github.com/ronelliott/go-cli/examples/subcommands)
+* a more complete example (with subcommands) can be found here: [examples/subcommands](https://github.com/ronelliott/go-cli/tree/master/examples/subcommands)
