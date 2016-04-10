@@ -1,0 +1,6 @@
+language: go
+install:
+  - go get github.com/stretchr/testify
+  - go get github.com/ronelliott/go-opts
+script:
+  - go test -v github.com/ronelliott/go-cli
