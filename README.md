@@ -2,7 +2,7 @@
 
 [![GoDoc](https://godoc.org/github.com/ronelliott/go-cli?status.png)](https://godoc.org/github.com/ronelliott/go-cli)
 [![Build Status](https://travis-ci.org/ronelliott/go-cli.svg?branch=master)](https://travis-ci.org/ronelliott/go-cli)
-[![Coverage Status](https://img.shields.io/coveralls/ronelliott/go-cli.svg)](https://coveralls.io/r/ronelliott/go-cli?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/ronelliott/go-cli/badge.svg?branch=master)](https://coveralls.io/github/ronelliott/go-cli?branch=master)
 
 a go library for writing command line interfaces
 
