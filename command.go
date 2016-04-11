@@ -3,6 +3,7 @@ package cli
 import (
     "errors"
     "github.com/ronelliott/go-opts"
+    "io"
     "os"
     "path"
     "strings"
@@ -25,6 +26,9 @@ type Command struct {
     // the name of the command
     Name string
 
+    // the OptionSet for the command
+    Options *opts.OptionSet
+
     // the commands subcommands
     Subs map[string]*Command
 }
@@ -41,18 +45,34 @@ func getCommandName(args []string) (string, int) {
 }
 
 // Create a new root level command.
-func NewCommand(name, description, help string, callback Runner) *Command {
+func NewCommand(
+        name,
+        description,
+        help string,
+        callback Runner) (*Command, error) {
+    var set *opts.OptionSet
+    var err error
+
+    if callback != nil {
+        set, err = opts.NewOptionSet(callback)
+
+        if err != nil {
+            return nil, err
+        }
+    }
+
     return &Command{
         Callback: callback,
         Description: description,
         Help: help,
         Name: name,
+        Options: set,
         Subs: map[string]*Command{},
-    }
+    }, nil
 }
 
 // Create a new root level command.
-func New(description string, callback Runner) *Command {
+func New(description string, callback Runner) (*Command, error) {
     return NewCommand(path.Base(os.Args[0]), description, "", callback)
 }
 
@@ -77,10 +97,15 @@ func (this *Command) NewSub(
         name,
         description string,
         help string,
-        callback Runner) *Command {
-    cmd := NewCommand(name, description, help, callback)
+        callback Runner) (*Command, error) {
+    cmd, err := NewCommand(name, description, help, callback)
+
+    if err != nil {
+        return nil, err
+    }
+
     this.Subs[cmd.Name] = cmd
-    return cmd
+    return cmd, nil
 }
 
 // Run the command
@@ -101,11 +126,16 @@ func (this *Command) Run(args []string) error {
         return errors.New("No command callback defined!")
     }
 
-    err := opts.Parse(this.Callback, args)
+    err := this.Options.Parse(args)
 
     if err != nil {
         return err
     }
 
     return this.Callback.Run()
+}
+
+// Writes the default options and descriptions to the given io.Writer
+func (this *Command) WriteHelp(out io.Writer) {
+    this.Options.WriteHelp(out)
 }

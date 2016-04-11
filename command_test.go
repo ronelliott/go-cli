@@ -1,7 +1,11 @@
 package cli
 
 import (
+    "bytes"
+    "github.com/blang/semver"
     "github.com/stretchr/testify/assert"
+    "runtime"
+    "strings"
     "testing"
 )
 
@@ -30,46 +34,76 @@ func TestGetCommandString_WithFlags(t *testing.T) {
 }
 
 func TestNew_SetName(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     assert.Equal(t, "go-cli.test", cmd.Name)
 }
 
 func TestNew_SetDescription(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     assert.Equal(t, "bar", cmd.Description)
 }
 
 func TestNew_NoSubs(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     assert.Equal(t, 0, len(cmd.Subs))
 }
 
+var TestNew_ErrorCalled bool
+
+type TestNew_ErrorCmd struct {
+    t *testing.T
+    Verbose bool `default:"Nein" short:"v"`
+}
+
+func (opts *TestNew_ErrorCmd) Run() error {
+    TestNew_ErrorCalled = true
+    return nil
+}
+
+func TestNew_Error(t *testing.T) {
+    assert.False(t, TestNew_ErrorCalled)
+    cmd, err := New("bar", &TestNew_ErrorCmd{t: t})
+    assert.NotNil(t, err)
+    assert.Nil(t, cmd)
+}
+
 func TestNewSub_ParentSubs(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     cmd.NewSub("car", "dar", "dar", nil)
     assert.Equal(t, 1, len(cmd.Subs))
 }
 
 func TestNewSub_SetName(t *testing.T) {
-    cmd := New("bar", nil)
-    sub := cmd.NewSub("car", "dar", "dar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
+    sub, err := cmd.NewSub("car", "dar", "dar", nil)
+    assert.Nil(t, err)
     assert.Equal(t, "car", sub.Name)
 }
 
 func TestNewSub_SetDescription(t *testing.T) {
-    cmd := New("bar", nil)
-    sub := cmd.NewSub("car", "dar", "dar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
+    sub, err := cmd.NewSub("car", "dar", "dar", nil)
+    assert.Nil(t, err)
     assert.Equal(t, "dar", sub.Description)
 }
 
 func TestNewSub_NoSubs(t *testing.T) {
-    cmd := New("bar", nil)
-    sub := cmd.NewSub("foo", "bar", "bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
+    sub, err := cmd.NewSub("foo", "bar", "bar", nil)
+    assert.Nil(t, err)
     assert.Equal(t, 0, len(sub.Subs))
 }
 
 func TestHasCallback_NoCallback(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     assert.False(t, cmd.HasCallback())
 }
 
@@ -80,56 +114,42 @@ func (opts *TestHasCallback_WithCallbackCmd) Run() error {
 }
 
 func TestHasCallback_WithCallback(t *testing.T) {
-    cmd := New("bar", &TestHasCallback_WithCallbackCmd{})
+    cmd, err := New("bar", &TestHasCallback_WithCallbackCmd{})
+    assert.Nil(t, err)
     assert.True(t, cmd.HasCallback())
 }
 
 func TestHasSubs_NoSubs(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     assert.False(t, cmd.HasSubs())
 }
 
 func TestHasSubs_WithSubs(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     cmd.NewSub("foo", "bar", "bar", nil)
     assert.True(t, cmd.HasSubs())
 }
 
 func TestHasSub_NoSubs(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     assert.False(t, cmd.HasSub("bar"))
 }
 
 func TestHasSub_NoChild(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     cmd.NewSub("foo", "bar", "bar", nil)
     assert.False(t, cmd.HasSub("bar"))
 }
 
 func TestHasSub_WithChild(t *testing.T) {
-    cmd := New("bar", nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
     cmd.NewSub("foo", "bar", "bar", nil)
     assert.True(t, cmd.HasSub("foo"))
-}
-
-var TestRun_ErrorCalled bool
-
-type TestRun_ErrorCmd struct {
-    t *testing.T
-    Verbose bool `default:"Nein" short:"v"`
-}
-
-func (opts *TestRun_ErrorCmd) Run() error {
-    TestRun_ErrorCalled = true
-    return nil
-}
-
-func TestRun_Error(t *testing.T) {
-    assert.False(t, TestRun_ErrorCalled)
-    cmd := New("bar", &TestRun_ErrorCmd{t: t})
-    err := cmd.Run([]string{"-v"})
-    assert.NotNil(t, err)
-    assert.False(t, TestRun_ErrorCalled)
 }
 
 var TestRun_ArgsCalled bool
@@ -147,8 +167,9 @@ func (opts *TestRun_ArgsCmd) Run() error {
 
 func TestRun_WithArgs(t *testing.T) {
     assert.False(t, TestRun_ArgsCalled)
-    cmd := New("bar", &TestRun_ArgsCmd{t: t})
-    err := cmd.Run([]string{"-v"})
+    cmd, err := New("bar", &TestRun_ArgsCmd{t: t})
+    assert.Nil(t, err)
+    err = cmd.Run([]string{"-v"})
     assert.Nil(t, err)
     assert.True(t, TestRun_ArgsCalled)
 }
@@ -169,15 +190,17 @@ func (opts *TestRun_LeftoverArgsCmd) Run() error {
 
 func TestRun_LeftoverArgs(t *testing.T) {
     assert.False(t, TestRun_LeftoverArgsCalled)
-    cmd := New("bar", &TestRun_LeftoverArgsCmd{t: t})
-    err := cmd.Run([]string{"-v", "foo", "bar"})
+    cmd, err := New("bar", &TestRun_LeftoverArgsCmd{t: t})
+    assert.Nil(t, err)
+    err = cmd.Run([]string{"-v", "foo", "bar"})
     assert.Nil(t, err)
     assert.True(t, TestRun_LeftoverArgsCalled)
 }
 
 func TestRun_NoCallback(t *testing.T) {
-    cmd := New("bar", nil)
-    err := cmd.Run(nil)
+    cmd, err := New("bar", nil)
+    assert.Nil(t, err)
+    err = cmd.Run(nil)
     assert.NotNil(t, err)
 }
 
@@ -196,9 +219,10 @@ func (opts *TestSubRun_LeftoverArgsCmd) Run() error {
 
 func TestSubRun_LeftoverArgs(t *testing.T) {
     assert.False(t, TestSubRun_LeftoverArgsCalled)
-    cmd := New("foo", nil)
+    cmd, err := New("foo", nil)
+    assert.Nil(t, err)
     cmd.NewSub("bar", "dar", "dar", &TestSubRun_LeftoverArgsCmd{t: t})
-    err := cmd.Run([]string{"bar", "car", "dar", "far"})
+    err = cmd.Run([]string{"bar", "car", "dar", "far"})
     assert.Nil(t, err)
     assert.True(t, TestSubRun_LeftoverArgsCalled)
 }
@@ -216,17 +240,19 @@ func (opts *TestSubRun_CallCallbackCmd) Run() error {
 
 func TestSubRun_CallCallback(t *testing.T) {
     assert.False(t, TestSubRun_CallCallbackCalled)
-    cmd := New("foo", nil)
+    cmd, err := New("foo", nil)
+    assert.Nil(t, err)
     cmd.NewSub("bar", "dar", "dar", &TestSubRun_CallCallbackCmd{t: t})
-    err := cmd.Run([]string{"bar"})
+    err = cmd.Run([]string{"bar"})
     assert.Nil(t, err)
     assert.True(t, TestSubRun_CallCallbackCalled)
 }
 
 func TestSubRun_NoCallback(t *testing.T) {
-    cmd := New("foo", nil)
+    cmd, err := New("foo", nil)
+    assert.Nil(t, err)
     cmd.NewSub("bar", "dar", "dar", nil)
-    err := cmd.Run([]string{"bar"})
+    err = cmd.Run([]string{"bar"})
     assert.NotNil(t, err)
 }
 
@@ -243,10 +269,65 @@ func (opts *TestNestedSubRun_CallCallbackCmd) Run() error {
 
 func TestNestedSubRun_CallCallback(t *testing.T) {
     assert.False(t, TestNestedSubRun_CallCallbackCalled)
-    cmd := New("foo", nil)
-    sub := cmd.NewSub("bar", "dar", "dar", nil)
+    cmd, err := New("foo", nil)
+    assert.Nil(t, err)
+    sub, err := cmd.NewSub("bar", "dar", "dar", nil)
+    assert.Nil(t, err)
     sub.NewSub("far", "car", "car", &TestNestedSubRun_CallCallbackCmd{t: t})
-    err := cmd.Run([]string{"bar", "far"})
+    err = cmd.Run([]string{"bar", "far"})
     assert.Nil(t, err)
     assert.True(t, TestNestedSubRun_CallCallbackCalled)
+}
+
+type TestWriteHelpCmd struct {
+    Name string `
+        default:"foo"
+        description:"The name to use"
+        help:"What do you want to name this thing?"
+        long:"name"
+        short:"n"`
+
+    Verbose bool `
+        default:"false"
+        description:"Use verbose logging."
+        help:"Be very talkative when logging"
+        long:"verbose"
+        short:"v"`
+}
+
+func (opts *TestWriteHelpCmd) Run() error {
+    return nil
+}
+
+func TestWriteHelp(t *testing.T) {
+    cmd, err := New("foo", &TestWriteHelpCmd{})
+    assert.Nil(t, err)
+    buf := bytes.Buffer{}
+    cmd.WriteHelp(&buf)
+
+    minVer, err := semver.Make("1.5.0")
+    assert.Nil(t, err)
+    version := strings.Replace(runtime.Version(), "go", "", 1)
+
+    if len(version) == 3 {
+        version += ".0"
+    }
+
+    curVer, err := semver.Make(version)
+    assert.Nil(t, err)
+
+    expected := "  -n string\n    \tThe name to use (default \"foo\")\n  " +
+        "-name string\n    \tThe name to use (default \"foo\")\n  " +
+        "-v\tUse verbose logging.\n  -verbose\n    \tUse verbose " +
+        "logging.\n"
+
+    // older versions of go (<1.5) have a different output
+    // format
+    if curVer.LT(minVer) {
+        expected = "  -n=\"foo\": The name to use\n  -name=\"foo\": The name " +
+            "to use\n  -v=false: Use verbose logging.\n  -verbose=false: " +
+            "Use verbose logging.\n"
+    }
+
+    assert.Equal(t, expected, buf.String())
 }
