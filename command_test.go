@@ -2,10 +2,7 @@ package cli
 
 import (
     "bytes"
-    "github.com/blang/semver"
     "github.com/stretchr/testify/assert"
-    "runtime"
-    "strings"
     "testing"
 )
 
@@ -305,29 +302,10 @@ func TestWriteHelp(t *testing.T) {
     buf := bytes.Buffer{}
     cmd.WriteHelp(&buf)
 
-    minVer, err := semver.Make("1.5.0")
-    assert.Nil(t, err)
-    version := strings.Replace(runtime.Version(), "go", "", 1)
-
-    if len(version) == 3 {
-        version += ".0"
-    }
-
-    curVer, err := semver.Make(version)
-    assert.Nil(t, err)
-
     expected := "  -n string\n    \tThe name to use (default \"foo\")\n  " +
         "-name string\n    \tThe name to use (default \"foo\")\n  " +
         "-v\tUse verbose logging.\n  -verbose\n    \tUse verbose " +
         "logging.\n"
-
-    // older versions of go (<1.5) have a different output
-    // format
-    if curVer.LT(minVer) {
-        expected = "  -n=\"foo\": The name to use\n  -name=\"foo\": The name " +
-            "to use\n  -v=false: Use verbose logging.\n  -verbose=false: " +
-            "Use verbose logging.\n"
-    }
 
     assert.Equal(t, expected, buf.String())
 }

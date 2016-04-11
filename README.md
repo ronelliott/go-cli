@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/ronelliott/go-cli.svg?branch=master)](https://travis-ci.org/ronelliott/go-cli)
 [![Coverage Status](https://coveralls.io/repos/github/ronelliott/go-cli/badge.svg?branch=master)](https://coveralls.io/github/ronelliott/go-cli?branch=master)
 
-a go library for writing command line interfaces
+A go library for writing command line interfaces. Only supports go versions newer than, or equal to, 1.5
 
 ## Installation
 
