@@ -3,6 +3,7 @@ package main
 import (
     "errors"
     "fmt"
+    "os"
 )
 
 type HelpCmd struct {
@@ -23,8 +24,7 @@ func (opts *HelpCmd) Run() error {
             fmt.Println(cmd.Help, "\n")
             fmt.Printf("Usage: %s %s [options]\n", app.Name, name)
             fmt.Println("\nThe available options are:")
-            // cmd.Flags.SetOutput(os.Stdout)
-            // cmd.Flags.PrintDefaults()
+            cmd.WriteHelp(os.Stdout)
         }
     } else {
         fmt.Printf("Invalid subcommand: %s\n", name)
@@ -34,5 +34,9 @@ func (opts *HelpCmd) Run() error {
 }
 
 func init() {
-    app.NewSub("help", "Help on using my awesome CLI", "See `help` :P", &HelpCmd{})
+    AddCommand(
+        "help",
+        "Help on using my awesome CLI",
+        "See `help` :P",
+        &HelpCmd{})
 }

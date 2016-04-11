@@ -47,7 +47,25 @@ func (opts *MainCmd) Run() error {
     return nil
 }
 
-var app *cli.Command = cli.New("Do some stuff and things", &MainCmd{})
+var app *cli.Command
+
+func AddCommand(name, description, help string, cmd cli.Runner) {
+    var err error
+
+    if app == nil {
+        app, err = cli.New("Do some stuff and things", &MainCmd{})
+
+        if err != nil {
+            panic(err)
+        }
+    }
+
+    _, err = app.NewSub(name, description, help, cmd)
+
+    if err != nil {
+        panic(err)
+    }
+}
 
 func main() {
     if err := app.Run(nil); err != nil {

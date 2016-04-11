@@ -40,5 +40,5 @@ func (opts *FibCmd) Run() error {
 }
 
 func init() {
-    app.NewSub("fib", "Fib it up yo!", "Run a fibonacci sequence", &FibCmd{})
+    AddCommand("fib", "Fib it up yo!", "Run a fibonacci sequence", &FibCmd{})
 }
