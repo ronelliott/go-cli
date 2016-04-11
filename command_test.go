@@ -48,23 +48,37 @@ func TestNew_NoSubs(t *testing.T) {
     assert.Equal(t, 0, len(cmd.Subs))
 }
 
-var TestNew_ErrorCalled bool
-
 type TestNew_ErrorCmd struct {
     t *testing.T
     Verbose bool `default:"Nein" short:"v"`
 }
 
 func (opts *TestNew_ErrorCmd) Run() error {
-    TestNew_ErrorCalled = true
     return nil
 }
 
 func TestNew_Error(t *testing.T) {
-    assert.False(t, TestNew_ErrorCalled)
     cmd, err := New("bar", &TestNew_ErrorCmd{t: t})
     assert.NotNil(t, err)
     assert.Nil(t, cmd)
+}
+
+type TestNewSub_ErrorCmd struct {
+    t *testing.T
+    Verbose bool `default:"Nein" short:"v"`
+}
+
+func (opts *TestNewSub_ErrorCmd) Run() error {
+    return nil
+}
+
+func TestNewSub_Error(t *testing.T) {
+    cmd, err := New("bar", nil)
+    assert.NotNil(t, cmd)
+    assert.Nil(t, err)
+    sub, err := cmd.NewSub("foo", "bar", "dar", &TestNewSub_ErrorCmd{t: t})
+    assert.NotNil(t, err)
+    assert.Nil(t, sub)
 }
 
 func TestNewSub_ParentSubs(t *testing.T) {
@@ -199,6 +213,28 @@ func TestRun_NoCallback(t *testing.T) {
     assert.Nil(t, err)
     err = cmd.Run(nil)
     assert.NotNil(t, err)
+}
+
+var TestRun_ErrorCalled bool
+
+type TestRun_ErrorCmd struct {
+    t *testing.T
+    Verbose bool `short:"v" description:"Show verbose debug information"`
+}
+
+func (opts *TestRun_ErrorCmd) Run() error {
+    TestRun_ErrorCalled = true
+    assert.True(opts.t, opts.Verbose)
+    return nil
+}
+
+func TestRun_Error(t *testing.T) {
+    assert.False(t, TestRun_ErrorCalled)
+    cmd, err := New("bar", &TestRun_ErrorCmd{t: t})
+    assert.Nil(t, err)
+    err = cmd.Run([]string{"-z"})
+    assert.NotNil(t, err)
+    assert.False(t, TestRun_ErrorCalled)
 }
 
 var TestSubRun_LeftoverArgsCalled bool
