@@ -9,6 +9,7 @@ install:
   - go get github.com/stretchr/testify
   - go get github.com/mattn/goveralls
   - go get github.com/ronelliott/go-opts
+  - go get github.com/blang/semver
 script:
   - go test -covermode=count -coverprofile=coverage.out -v github.com/ronelliott/go-cli
 after_success:
