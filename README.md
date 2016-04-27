@@ -56,3 +56,5 @@ func main() {
 ### Subcommands:
 
 * a more complete example (with subcommands) can be found here: [examples/subcommands](https://github.com/ronelliott/go-cli/tree/master/examples/subcommands)
+
+[![Analytics](https://ga-beacon.appspot.com/UA-59523757-2/go-cli/readme?pixel)](https://github.com/igrigorik/ga-beacon)
