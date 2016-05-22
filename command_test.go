@@ -130,6 +130,32 @@ func TestHasCallback_WithCallback(t *testing.T) {
 	assert.True(t, cmd.HasCallback())
 }
 
+type TestHasOptions_NoOptionsStruct struct{}
+
+func (opts *TestHasOptions_NoOptionsStruct) Run() error {
+	return nil
+}
+
+func TestHasOptions_NoOptions(t *testing.T) {
+	cmd, err := New("bar", &TestHasOptions_NoOptionsStruct{})
+	assert.Nil(t, err)
+	assert.False(t, cmd.HasOptions())
+}
+
+type TestHasOptions_WithOptionsStruct struct{
+	Verbose bool `default:"false" short:"v"`
+}
+
+func (opts *TestHasOptions_WithOptionsStruct) Run() error {
+	return nil
+}
+
+func TestHasOptions_WithOptions(t *testing.T) {
+	cmd, err := New("bar", &TestHasOptions_WithOptionsStruct{})
+	assert.Nil(t, err)
+	assert.True(t, cmd.HasOptions())
+}
+
 func TestHasSubs_NoSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
 	assert.Nil(t, err)

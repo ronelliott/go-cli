@@ -108,6 +108,11 @@ func (this *Command) NewSub(
 	return cmd, nil
 }
 
+// Checks if the command has options
+func (this *Command) HasOptions() bool {
+	return this.Options.HasOptions()
+}
+
 // Run the command
 func (this *Command) Run(args []string) error {
 	if args == nil {
