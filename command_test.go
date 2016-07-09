@@ -2,50 +2,51 @@ package cli
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCommandString_Empty(t *testing.T) {
 	name, idx := getCommandName([]string{})
-	assert.Equal(t, "", name)
-	assert.Equal(t, -1, idx)
+	require.Equal(t, "", name)
+	require.Equal(t, -1, idx)
 }
 
 func TestGetCommandString_Single(t *testing.T) {
 	name, idx := getCommandName([]string{"foo"})
-	assert.Equal(t, "foo", name)
-	assert.Equal(t, 0, idx)
+	require.Equal(t, "foo", name)
+	require.Equal(t, 0, idx)
 }
 
 func TestGetCommandString_Multiple(t *testing.T) {
 	name, idx := getCommandName([]string{"foo", "bar"})
-	assert.Equal(t, "foo", name)
-	assert.Equal(t, 0, idx)
+	require.Equal(t, "foo", name)
+	require.Equal(t, 0, idx)
 }
 
 func TestGetCommandString_WithFlags(t *testing.T) {
 	name, idx := getCommandName([]string{"-f", "--bar", "foo"})
-	assert.Equal(t, "foo", name)
-	assert.Equal(t, 2, idx)
+	require.Equal(t, "foo", name)
+	require.Equal(t, 2, idx)
 }
 
 func TestNew_SetName(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, "go-cli.test", cmd.Name)
+	require.Nil(t, err)
+	require.Equal(t, "go-cli.test", cmd.Name)
 }
 
 func TestNew_SetDescription(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, "bar", cmd.Description)
+	require.Nil(t, err)
+	require.Equal(t, "bar", cmd.Description)
 }
 
 func TestNew_NoSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, 0, len(cmd.Subs))
+	require.Nil(t, err)
+	require.Equal(t, 0, len(cmd.Subs))
 }
 
 type TestNew_ErrorCmd struct {
@@ -59,8 +60,8 @@ func (opts *TestNew_ErrorCmd) Run() error {
 
 func TestNew_Error(t *testing.T) {
 	cmd, err := New("bar", &TestNew_ErrorCmd{t: t})
-	assert.NotNil(t, err)
-	assert.Nil(t, cmd)
+	require.NotNil(t, err)
+	require.Nil(t, cmd)
 }
 
 type TestNewSub_ErrorCmd struct {
@@ -74,48 +75,48 @@ func (opts *TestNewSub_ErrorCmd) Run() error {
 
 func TestNewSub_Error(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.NotNil(t, cmd)
-	assert.Nil(t, err)
+	require.NotNil(t, cmd)
+	require.Nil(t, err)
 	sub, err := cmd.NewSub("foo", "bar", "dar", &TestNewSub_ErrorCmd{t: t})
-	assert.NotNil(t, err)
-	assert.Nil(t, sub)
+	require.NotNil(t, err)
+	require.Nil(t, sub)
 }
 
 func TestNewSub_ParentSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("car", "dar", "dar", nil)
-	assert.Equal(t, 1, len(cmd.Subs))
+	require.Equal(t, 1, len(cmd.Subs))
 }
 
 func TestNewSub_SetName(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	sub, err := cmd.NewSub("car", "dar", "dar", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, "car", sub.Name)
+	require.Nil(t, err)
+	require.Equal(t, "car", sub.Name)
 }
 
 func TestNewSub_SetDescription(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	sub, err := cmd.NewSub("car", "dar", "dar", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, "dar", sub.Description)
+	require.Nil(t, err)
+	require.Equal(t, "dar", sub.Description)
 }
 
 func TestNewSub_NoSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	sub, err := cmd.NewSub("foo", "bar", "bar", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, 0, len(sub.Subs))
+	require.Nil(t, err)
+	require.Equal(t, 0, len(sub.Subs))
 }
 
 func TestHasCallback_NoCallback(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
-	assert.False(t, cmd.HasCallback())
+	require.Nil(t, err)
+	require.False(t, cmd.HasCallback())
 }
 
 type TestHasCallback_WithCallbackCmd struct{}
@@ -126,8 +127,8 @@ func (opts *TestHasCallback_WithCallbackCmd) Run() error {
 
 func TestHasCallback_WithCallback(t *testing.T) {
 	cmd, err := New("bar", &TestHasCallback_WithCallbackCmd{})
-	assert.Nil(t, err)
-	assert.True(t, cmd.HasCallback())
+	require.Nil(t, err)
+	require.True(t, cmd.HasCallback())
 }
 
 type TestHasOptions_NoOptionsStruct struct{}
@@ -138,8 +139,8 @@ func (opts *TestHasOptions_NoOptionsStruct) Run() error {
 
 func TestHasOptions_NoOptions(t *testing.T) {
 	cmd, err := New("bar", &TestHasOptions_NoOptionsStruct{})
-	assert.Nil(t, err)
-	assert.False(t, cmd.HasOptions())
+	require.Nil(t, err)
+	require.False(t, cmd.HasOptions())
 }
 
 type TestHasOptions_WithOptionsStruct struct{
@@ -152,41 +153,41 @@ func (opts *TestHasOptions_WithOptionsStruct) Run() error {
 
 func TestHasOptions_WithOptions(t *testing.T) {
 	cmd, err := New("bar", &TestHasOptions_WithOptionsStruct{})
-	assert.Nil(t, err)
-	assert.True(t, cmd.HasOptions())
+	require.Nil(t, err)
+	require.True(t, cmd.HasOptions())
 }
 
 func TestHasSubs_NoSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
-	assert.False(t, cmd.HasSubs())
+	require.Nil(t, err)
+	require.False(t, cmd.HasSubs())
 }
 
 func TestHasSubs_WithSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("foo", "bar", "bar", nil)
-	assert.True(t, cmd.HasSubs())
+	require.True(t, cmd.HasSubs())
 }
 
 func TestHasSub_NoSubs(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
-	assert.False(t, cmd.HasSub("bar"))
+	require.Nil(t, err)
+	require.False(t, cmd.HasSub("bar"))
 }
 
 func TestHasSub_NoChild(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("foo", "bar", "bar", nil)
-	assert.False(t, cmd.HasSub("bar"))
+	require.False(t, cmd.HasSub("bar"))
 }
 
 func TestHasSub_WithChild(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("foo", "bar", "bar", nil)
-	assert.True(t, cmd.HasSub("foo"))
+	require.True(t, cmd.HasSub("foo"))
 }
 
 var TestRun_ArgsCalled bool
@@ -198,17 +199,17 @@ type TestRun_ArgsCmd struct {
 
 func (opts *TestRun_ArgsCmd) Run() error {
 	TestRun_ArgsCalled = true
-	assert.True(opts.t, opts.Verbose)
+	require.True(opts.t, opts.Verbose)
 	return nil
 }
 
 func TestRun_WithArgs(t *testing.T) {
-	assert.False(t, TestRun_ArgsCalled)
+	require.False(t, TestRun_ArgsCalled)
 	cmd, err := New("bar", &TestRun_ArgsCmd{t: t})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	err = cmd.Run([]string{"-v"})
-	assert.Nil(t, err)
-	assert.True(t, TestRun_ArgsCalled)
+	require.Nil(t, err)
+	require.True(t, TestRun_ArgsCalled)
 }
 
 var TestRun_LeftoverArgsCalled bool
@@ -221,24 +222,24 @@ type TestRun_LeftoverArgsCmd struct {
 
 func (opts *TestRun_LeftoverArgsCmd) Run() error {
 	TestRun_LeftoverArgsCalled = true
-	assert.Equal(opts.t, []string{"foo", "bar"}, opts.Args)
+	require.Equal(opts.t, []string{"foo", "bar"}, opts.Args)
 	return nil
 }
 
 func TestRun_LeftoverArgs(t *testing.T) {
-	assert.False(t, TestRun_LeftoverArgsCalled)
+	require.False(t, TestRun_LeftoverArgsCalled)
 	cmd, err := New("bar", &TestRun_LeftoverArgsCmd{t: t})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	err = cmd.Run([]string{"-v", "foo", "bar"})
-	assert.Nil(t, err)
-	assert.True(t, TestRun_LeftoverArgsCalled)
+	require.Nil(t, err)
+	require.True(t, TestRun_LeftoverArgsCalled)
 }
 
 func TestRun_NoCallback(t *testing.T) {
 	cmd, err := New("bar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	err = cmd.Run(nil)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 var TestRun_ErrorCalled bool
@@ -250,17 +251,17 @@ type TestRun_ErrorCmd struct {
 
 func (opts *TestRun_ErrorCmd) Run() error {
 	TestRun_ErrorCalled = true
-	assert.True(opts.t, opts.Verbose)
+	require.True(opts.t, opts.Verbose)
 	return nil
 }
 
 func TestRun_Error(t *testing.T) {
-	assert.False(t, TestRun_ErrorCalled)
+	require.False(t, TestRun_ErrorCalled)
 	cmd, err := New("bar", &TestRun_ErrorCmd{t: t})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	err = cmd.Run([]string{"-z"})
-	assert.NotNil(t, err)
-	assert.False(t, TestRun_ErrorCalled)
+	require.NotNil(t, err)
+	require.False(t, TestRun_ErrorCalled)
 }
 
 var TestSubRun_LeftoverArgsCalled bool
@@ -272,18 +273,18 @@ type TestSubRun_LeftoverArgsCmd struct {
 
 func (opts *TestSubRun_LeftoverArgsCmd) Run() error {
 	TestSubRun_LeftoverArgsCalled = true
-	assert.Equal(opts.t, []string{"car", "dar", "far"}, opts.Args)
+	require.Equal(opts.t, []string{"car", "dar", "far"}, opts.Args)
 	return nil
 }
 
 func TestSubRun_LeftoverArgs(t *testing.T) {
-	assert.False(t, TestSubRun_LeftoverArgsCalled)
+	require.False(t, TestSubRun_LeftoverArgsCalled)
 	cmd, err := New("foo", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("bar", "dar", "dar", &TestSubRun_LeftoverArgsCmd{t: t})
 	err = cmd.Run([]string{"bar", "car", "dar", "far"})
-	assert.Nil(t, err)
-	assert.True(t, TestSubRun_LeftoverArgsCalled)
+	require.Nil(t, err)
+	require.True(t, TestSubRun_LeftoverArgsCalled)
 }
 
 var TestSubRun_CallCallbackCalled bool
@@ -298,21 +299,21 @@ func (opts *TestSubRun_CallCallbackCmd) Run() error {
 }
 
 func TestSubRun_CallCallback(t *testing.T) {
-	assert.False(t, TestSubRun_CallCallbackCalled)
+	require.False(t, TestSubRun_CallCallbackCalled)
 	cmd, err := New("foo", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("bar", "dar", "dar", &TestSubRun_CallCallbackCmd{t: t})
 	err = cmd.Run([]string{"bar"})
-	assert.Nil(t, err)
-	assert.True(t, TestSubRun_CallCallbackCalled)
+	require.Nil(t, err)
+	require.True(t, TestSubRun_CallCallbackCalled)
 }
 
 func TestSubRun_NoCallback(t *testing.T) {
 	cmd, err := New("foo", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	cmd.NewSub("bar", "dar", "dar", nil)
 	err = cmd.Run([]string{"bar"})
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 var TestNestedSubRun_CallCallbackCalled bool
@@ -327,15 +328,15 @@ func (opts *TestNestedSubRun_CallCallbackCmd) Run() error {
 }
 
 func TestNestedSubRun_CallCallback(t *testing.T) {
-	assert.False(t, TestNestedSubRun_CallCallbackCalled)
+	require.False(t, TestNestedSubRun_CallCallbackCalled)
 	cmd, err := New("foo", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	sub, err := cmd.NewSub("bar", "dar", "dar", nil)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	sub.NewSub("far", "car", "car", &TestNestedSubRun_CallCallbackCmd{t: t})
 	err = cmd.Run([]string{"bar", "far"})
-	assert.Nil(t, err)
-	assert.True(t, TestNestedSubRun_CallCallbackCalled)
+	require.Nil(t, err)
+	require.True(t, TestNestedSubRun_CallCallbackCalled)
 }
 
 type TestWriteHelpCmd struct {
@@ -360,7 +361,7 @@ func (opts *TestWriteHelpCmd) Run() error {
 
 func TestWriteHelp(t *testing.T) {
 	cmd, err := New("foo", &TestWriteHelpCmd{})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	buf := bytes.Buffer{}
 	cmd.WriteHelp(&buf)
 
@@ -369,5 +370,5 @@ func TestWriteHelp(t *testing.T) {
 		"-v\tUse verbose logging.\n  -verbose\n    \tUse verbose " +
 		"logging.\n"
 
-	assert.Equal(t, expected, buf.String())
+	require.Equal(t, expected, buf.String())
 }

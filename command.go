@@ -2,11 +2,12 @@ package cli
 
 import (
 	"errors"
-	"github.com/ronelliott/go-opts"
 	"io"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/ronelliott/go-opts"
 )
 
 type Runner interface {
@@ -104,8 +105,22 @@ func (this *Command) NewSub(
 		return nil, err
 	}
 
-	this.Subs[cmd.Name] = cmd
+	this.NewSubCommand(cmd)
 	return cmd, nil
+}
+
+// Create a new sub level command.
+func (this *Command) NewSubCommand(cmd *Command) {
+	this.Subs[cmd.Name] = cmd
+}
+
+// Create new sub level commands from the given list.
+func (this *Command) NewSubCommands(cmds []*Command) error {
+	for _, sub := range cmds {
+		this.NewSubCommand(sub)
+	}
+
+	return nil
 }
 
 // Checks if the command has options
