@@ -8,6 +8,8 @@ import (
 
 type CategoryCommand struct {
 	Command
+
+	Default Runner
 }
 
 func NewCategoryCommand(name, description, help string) (*CategoryCommand, error) {
@@ -23,7 +25,23 @@ func NewCategoryCommand(name, description, help string) (*CategoryCommand, error
 	return catCmd, nil
 }
 
+func NewCategoryCommandWithDefault(
+	name, description, help string, def Runner) (*CategoryCommand, error) {
+	cmd, err := NewCategoryCommand(name, description, help)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cmd.Default = def
+	return cmd, nil
+}
+
 func (opts *CategoryCommand) Run() error {
+	if opts.Default != nil {
+		return opts.Default.Run()
+	}
+
 	if len(opts.Command.Subs) == 0 {
 		return nil
 	}
@@ -53,7 +71,7 @@ func (opts *CategoryCommand) Run() error {
 	for idx := range names {
 		cmd := opts.Command.Subs[names[idx]]
 		fmt.Printf("\t%s", cmd.Name)
-		fmt.Print(strings.Repeat(" ", maxNameLen - len(cmd.Name)))
+		fmt.Print(strings.Repeat(" ", maxNameLen-len(cmd.Name)))
 		fmt.Println("\t", cmd.Description)
 	}
 

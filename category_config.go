@@ -10,12 +10,16 @@ type CategoryConfig struct {
 	// the help for the CategoryCommand
 	Help string
 
+	// the default command for the CategoryCommand
+	Default Runner
+
 	// the subcommands for the CategoryCommand
 	Commands []CommandConverter
 }
 
 func (cfg *CategoryConfig) Convert() (*Command, error) {
-	cmd, err := NewCategoryCommand(cfg.Name, cfg.Desc, cfg.Help)
+	cmd, err := NewCategoryCommandWithDefault(
+		cfg.Name, cfg.Desc, cfg.Help, cfg.Default)
 
 	if err != nil {
 		return nil, err

@@ -15,6 +15,17 @@ func NewApp(name, description, help string) (*App, error) {
 	return &app, nil
 }
 
+func NewAppWithDefault(name, description, help string, def Runner) (*App, error) {
+	cmd, err := NewCategoryCommandWithDefault(name, description, help, def)
+
+	if err != nil {
+		return nil, err
+	}
+
+	app := App{*cmd}
+	return &app, nil
+}
+
 func (this *App) AddHelpCommand() error {
 	_, err := this.NewSub(
 		"help",

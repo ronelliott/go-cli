@@ -10,12 +10,15 @@ type AppConfig struct {
 	// the help for the App
 	Help string
 
+	// the default command the App
+	Default Runner
+
 	// the subcommands for the App
 	Commands []CommandConverter
 }
 
 func (cfg *AppConfig) Convert(withHelp bool) (*App, error) {
-	app, err := NewApp(cfg.Name, cfg.Desc, cfg.Help)
+	app, err := NewAppWithDefault(cfg.Name, cfg.Desc, cfg.Help, cfg.Default)
 
 	if err != nil {
 		return nil, err
