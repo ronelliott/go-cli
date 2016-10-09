@@ -128,6 +128,11 @@ func (this *Command) HasOptions() bool {
 	return this.Options.HasOptions()
 }
 
+// Checks if the command has positional args
+func (this *Command) HasPositional() bool {
+	return this.Options.HasPositional()
+}
+
 // Run the command
 func (this *Command) Run(args []string) error {
 	if args == nil {

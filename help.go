@@ -57,12 +57,22 @@ func (opts *HelpCommand) Run() error {
 		fmt.Println(cmd.Help)
 		fmt.Printf("\nUsage: %s %s", opts.app.Name, cmdPath)
 
-		if cmd.HasOptions() {
-			fmt.Println(" [options]")
+		hasOptions := cmd.HasOptions()
+		hasPositional := cmd.HasPositional()
+
+		if hasOptions {
+			fmt.Print(" [options]")
+		}
+
+		if hasPositional {
+			fmt.Print(" <args...>")
+		}
+
+		fmt.Println()
+
+		if hasOptions {
 			fmt.Println("\nThe available options are:")
 			cmd.WriteHelp(os.Stdout)
-		} else {
-			fmt.Println("")
 		}
 	}
 
