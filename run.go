@@ -1,6 +1,9 @@
 package cli
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 // Run the defined app
 func run(cfg *AppConfig, withHelp bool) error {
@@ -34,7 +37,7 @@ func RunWithHelpAndErrors(cfg *AppConfig) error {
 	err := RunWithHelp(cfg)
 
 	if err != nil {
-		os.Stderr.WriteString(err.Error())
+		os.Stderr.WriteString(fmt.Sprintf("%s\n", err.Error()))
 	}
 
 	return err
