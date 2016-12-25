@@ -2,6 +2,8 @@ language: go
 go:
   - 1.5
   - 1.6
+  - 1.7
+  - 1.8
 install:
   - go get github.com/stretchr/testify
   - go get github.com/mattn/goveralls
