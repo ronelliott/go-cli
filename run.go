@@ -43,10 +43,33 @@ func RunWithHelpAndErrors(cfg *AppConfig) error {
 	return err
 }
 
+// Run the defined app, printing errors to stderr
+func RunWithErrors(cfg *AppConfig) error {
+	err := Run(cfg)
+
+	if err != nil {
+		os.Stderr.WriteString(fmt.Sprintf("%s\n", err.Error()))
+	}
+
+	return err
+}
+
 // Run the defined app, adding the help command, printing errors to stderr, and
 // exiting with a non-zero code if an error occurs
 func RunWithHelpErrorsAndExit(cfg *AppConfig) error {
 	err := RunWithHelpAndErrors(cfg)
+
+	if err != nil {
+		os.Exit(1)
+	}
+
+	return err
+}
+
+// Run the defined app, printing errors to stderr, and exiting with a non-zero
+// code if an error occurs
+func RunWithErrorsAndExit(cfg *AppConfig) error {
+	err := RunWithErrors(cfg)
 
 	if err != nil {
 		os.Exit(1)
